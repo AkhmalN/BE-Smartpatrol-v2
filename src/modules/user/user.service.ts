@@ -19,10 +19,12 @@ export interface IUserService {
     page,
     limit,
     sortBy,
+    search,
   }: {
     page?: number;
     limit?: number;
     sortBy?: "ASC" | "DESC";
+    search?: string;
   }): Promise<IUser[]>;
   getUsersByUnitKerja(unitKerja: string): Promise<IUser[]>;
   changeUserPassword(userId: string, newPassword: string): Promise<void>;
@@ -65,6 +67,9 @@ export class UserService implements IUserService {
   }
 
   async getUserById(userId: string): Promise<IUser | null> {
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
     return this.userRepository.getUserById(userId);
   }
 
@@ -80,15 +85,17 @@ export class UserService implements IUserService {
   }
 
   async getAllUsers({
-    page,
-    limit,
-    sortBy,
+    page = 1,
+    limit = 10,
+    sortBy = "ASC",
+    search = "",
   }: {
     page?: number;
     limit?: number;
     sortBy?: "ASC" | "DESC";
+    search?: string;
   }): Promise<IUser[]> {
-    return this.userRepository.getAllUsers({ page, limit, sortBy });
+    return this.userRepository.getAllUsers({ page, limit, sortBy, search });
   }
 
   async getUsersByUnitKerja(unitKerja: string): Promise<IUser[]> {

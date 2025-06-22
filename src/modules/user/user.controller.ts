@@ -88,4 +88,72 @@ export class UserController {
       });
     }
   }
+  async getUserById(req: Request, res: Response): Promise<void> {
+    const userId = req.params.id;
+    if (!userId) {
+      res.status(400).json({ message: "User ID is required." });
+      return;
+    }
+    try {
+      const user = await this.userService.getUserById(userId);
+      if (!user) {
+        res.status(404).json({ message: "User not found." });
+        return;
+      }
+      res.status(200).json({ data: user });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error retrieving user",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+  async getAllUsers(req: Request, res: Response): Promise<void> {
+    const { page, size, sortBy, search } = req.query;
+    try {
+      const users = await this.userService.getAllUsers({
+        page: Number(page),
+        limit: Number(size) || 10,
+        sortBy: sortBy as "ASC" | "DESC",
+        search: search ? (search as string) : "",
+      });
+      res.status(200).json({
+        message: "Users retrieved successfully",
+        success: true,
+        data: users,
+        meta: {
+          total: users.length,
+          page: Number(page) || 1,
+          limit: Number(size) || 10,
+          sortBy: sortBy || "ASC",
+        },
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error retrieving users",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+  async getUserByUnitKerja(req: Request, res: Response) {
+    const { unit_kerja } = req.query;
+    if (!unit_kerja) {
+      res.status(404).json({
+        message: "Unit kerja tidak ditemukan",
+      });
+    }
+
+    try {
+      const user = this.userService.getUsersByUnitKerja(unit_kerja as string);
+      res.status(200).json({
+        message: "Users retrieved successfully",
+        data: user,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error retrieving users",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
 }

@@ -13,5 +13,26 @@ export function createUserRouter(userController: UserController): Router {
   );
   // POST /api/users/login
   router.post("/login", userController.loginUser.bind(userController));
+
+  // GET /api/users?page=1&size=10&sort=ASC&search={}
+  router.get(
+    "/",
+    protectRoute,
+    userController.getAllUsers.bind(userController)
+  );
+
+  // GET /api/users/:id
+  router.get(
+    "/:id",
+    protectRoute,
+    userController.getUserById.bind(userController)
+  );
+
+  // Get /api/users?instansi=UNAS PEJATEN
+  router.get(
+    "/",
+    protectRoute,
+    userController.getUserByUnitKerja.bind(userController)
+  );
   return router;
 }

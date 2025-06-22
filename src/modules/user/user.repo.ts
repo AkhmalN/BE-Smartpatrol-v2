@@ -4,6 +4,7 @@ import {
   IUserCreateDTO,
   IUserUpdateDTO,
 } from "@/models/user.model";
+import { logger } from "@/utils/logger";
 import { Model } from "mongoose";
 
 export interface IUserRepository {
@@ -15,10 +16,12 @@ export interface IUserRepository {
     page,
     limit,
     sortBy,
+    search,
   }: {
     page?: number;
     limit?: number;
     sortBy?: "ASC" | "DESC";
+    search?: string;
   }): Promise<IUser[]>;
   getUsersByUnitKerja(unitKerja: string): Promise<IUser[]>;
   checkUserExists(username: string, email: string): Promise<boolean>;
@@ -54,7 +57,8 @@ export class UserRepository implements IUserRepository {
 
   async getUserById(userId: string): Promise<IUser | null> {
     // Implementation for getting a user by ID
-    throw new Error("Method not implemented.");
+    const user = await this.userModel.findById(userId).exec();
+    return user;
   }
 
   async updateUser(
@@ -70,21 +74,37 @@ export class UserRepository implements IUserRepository {
     throw new Error("Method not implemented.");
   }
 
+  // Implementation for get all user based on pagination
   async getAllUsers({
-    page = 1,
-    limit = 10,
-    sortBy = "ASC",
+    page,
+    limit,
+    sortBy,
+    search,
   }: {
     page?: number;
     limit?: number;
     sortBy?: "ASC" | "DESC";
+    search?: string;
   }): Promise<IUser[]> {
-    // Implementation for getting all users with pagination and sorting
-    throw new Error("Method not implemented.");
+    const filter: any = {};
+
+    if (search) {
+      filter.$or = [{ username: { $regex: search, $options: "i" } }];
+    }
+    const query = this.userModel.find(filter, "-password -__v");
+    if (sortBy) {
+      query.sort({ username: sortBy === "ASC" ? 1 : -1 });
+    }
+    if (page && limit) {
+      query.skip((page - 1) * limit).limit(limit);
+    }
+    const users = await query.exec();
+    return users;
   }
 
+  // Implementation for getting users by unit kerja
   async getUsersByUnitKerja(unitKerja: string): Promise<IUser[]> {
-    // Implementation for getting users by unit kerja
-    throw new Error("Method not implemented.");
+    const userByUnitKerja = this.userModel.find({ unit_kerja: unitKerja });
+    return userByUnitKerja;
   }
 }
