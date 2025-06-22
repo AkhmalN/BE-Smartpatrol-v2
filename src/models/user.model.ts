@@ -16,6 +16,28 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
+const userSchema = new Schema<IUser>(
+  {
+    nama_lengkap: { type: String, required: true },
+    username: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    domisili: { type: String, required: true },
+    tempat_lahir: { type: String, required: true },
+    tanggal_lahir: { type: Date, required: true },
+    no_hp: { type: String, required: true },
+    role: { type: String, required: true },
+    unit_kerja: { type: String, required: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+export const UserModel = model<IUser>("User", userSchema);
+
 export interface IUserCreateDTO {
   nama_lengkap: string;
   username: string;
@@ -57,24 +79,12 @@ export interface IUserResponseDTO {
   updatedAt: Date;
 }
 
-const userSchema = new Schema<IUser>(
-  {
-    nama_lengkap: { type: String, required: true },
-    username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    domisili: { type: String, required: true },
-    tempat_lahir: { type: String, required: true },
-    tanggal_lahir: { type: Date, required: true },
-    no_hp: { type: String, required: true },
-    role: { type: String, required: true },
-    unit_kerja: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
-  },
-  {
-    timestamps: true,
-  }
-);
+export interface IUserLoginDTO {
+  username: string;
+  password: string;
+}
 
-export const UserModel = model<IUser>("User", userSchema);
+export interface IUserChangePasswordDTO {
+  userId: string;
+  newPassword: string;
+}

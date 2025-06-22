@@ -22,6 +22,7 @@ export interface IUserRepository {
   }): Promise<IUser[]>;
   getUsersByUnitKerja(unitKerja: string): Promise<IUser[]>;
   checkUserExists(username: string, email: string): Promise<boolean>;
+  findUserByUsername(username: string): Promise<IUser | null>;
 }
 
 export class UserRepository implements IUserRepository {
@@ -31,6 +32,11 @@ export class UserRepository implements IUserRepository {
     this.userModel = userModel;
   }
 
+  // Implementation for checking exist user for login
+  async findUserByUsername(username: string): Promise<IUser | null> {
+    const user = await this.userModel.findOne({ username: username }).exec();
+    return user; // Returns true if user exists, false otherwise
+  }
   // Implementation for checking if a user exists by username or email
   async checkUserExists(username: string, email: string): Promise<boolean> {
     const user = await this.userModel.findOne({

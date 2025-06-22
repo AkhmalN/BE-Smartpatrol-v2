@@ -1,11 +1,14 @@
 import {
   IUser,
   IUserCreateDTO,
+  IUserLoginDTO,
   IUserResponseDTO,
   IUserUpdateDTO,
 } from "@/models/user.model";
 import { IUserRepository } from "./user.repo";
-import { hashPassword } from "@/utils/hash";
+import { comparePassword, hashPassword } from "@/utils/hash";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
 export interface IUserService {
   createUser(userData: IUserCreateDTO): Promise<IUser>;
@@ -23,14 +26,24 @@ export interface IUserService {
   }): Promise<IUser[]>;
   getUsersByUnitKerja(unitKerja: string): Promise<IUser[]>;
   changeUserPassword(userId: string, newPassword: string): Promise<void>;
-  loginUser(username: string, password: string): Promise<IUser | null>;
+  loginUser(credentials: IUserLoginDTO): Promise<{
+    access_token: string;
+    unauthorized: boolean;
+    not_found: boolean;
+  }>;
 }
+
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretjwtkey";
 
 export class UserService implements IUserService {
   private userRepository: IUserRepository;
 
   constructor(userRepository: IUserRepository) {
     this.userRepository = userRepository;
+  }
+  generateAccessToken(access_token: string): string {
+    throw new Error("Method not implemented.");
   }
 
   async createUser(userData: IUserCreateDTO): Promise<IUser> {
@@ -87,8 +100,47 @@ export class UserService implements IUserService {
     throw new Error("Method not implemented.");
   }
 
-  async loginUser(username: string, password: string): Promise<IUser | null> {
-    // Implementation for user login
-    throw new Error("Method not implemented.");
+  async loginUser(credentials: IUserLoginDTO): Promise<{
+    access_token: string;
+    unauthorized: boolean;
+    not_found: boolean;
+  }> {
+    const { username, password } = credentials;
+    const findUser = await this.userRepository.findUserByUsername(username);
+
+    // Check if user exists
+    if (!findUser) {
+      return {
+        access_token: "",
+        not_found: true,
+        unauthorized: false,
+      };
+    }
+    const isPasswordValid = await comparePassword(password, findUser.password);
+    // Check if password is valid
+    if (!isPasswordValid) {
+      return {
+        access_token: "",
+        not_found: false,
+        unauthorized: true,
+      };
+    }
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        id: findUser._id,
+        role: findUser.role,
+        username: findUser.username,
+      },
+      JWT_SECRET,
+      {
+        expiresIn: 1 * 60 * 60 * 24,
+      }
+    );
+    return {
+      access_token: token,
+      unauthorized: false,
+      not_found: false,
+    };
   }
 }

@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { IUserService } from "./user.service";
-import { logger } from "@/utils/logger";
 
 export class UserController {
   private userService: IUserService;
@@ -8,16 +7,41 @@ export class UserController {
   constructor(userService: IUserService) {
     this.userService = userService;
   }
-  async checkHealth(req: Request, res: Response): Promise<void> {
+
+  async loginUser(req: Request, res: Response): Promise<void> {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      res.status(400).json({ message: "Username dan password harus diisi." });
+      return;
+    }
     try {
+      const user = await this.userService.loginUser({ username, password });
+
+      if (user.not_found) {
+        res
+          .status(401)
+          .json({ message: "Username salah atau akun tidak ditemukan!." });
+        return;
+      }
+      if (user.unauthorized) {
+        res.status(403).json({ message: "password salah!." });
+        return;
+      }
+
+      const access_token = user.access_token;
+
       res.status(200).json({
-        message: "User service is healthy",
+        success: true,
+        message: "Login successful",
+        access_token,
       });
     } catch (error) {
-      logger.error("Error checking user service health:", error);
       res.status(500).json({
-        message: "Error checking user service health",
+        success: false,
+        message: "Error logging in user",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
+      return;
     }
   }
   async createUser(req: Request, res: Response): Promise<void> {
