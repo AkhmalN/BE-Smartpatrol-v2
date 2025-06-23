@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import { logger } from "./utils/logger";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import { UserModel } from "@/models/user.model";
 import userModule from "@/modules/user/user.module";
@@ -19,6 +20,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 const userRouter = userModule(UserModel);
 app.use("/api/v2/users", userRouter);

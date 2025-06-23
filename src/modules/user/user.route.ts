@@ -21,6 +21,13 @@ export function createUserRouter(userController: UserController): Router {
     userController.getAllUsers.bind(userController)
   );
 
+  // Get /api/users/instansi
+  router.get(
+    "/instansi",
+    protectRoute,
+    userController.getUserByUnitKerja.bind(userController)
+  );
+
   // GET /api/users/:id
   router.get(
     "/:id",
@@ -28,11 +35,5 @@ export function createUserRouter(userController: UserController): Router {
     userController.getUserById.bind(userController)
   );
 
-  // Get /api/users?instansi=UNAS PEJATEN
-  router.get(
-    "/",
-    protectRoute,
-    userController.getUserByUnitKerja.bind(userController)
-  );
   return router;
 }

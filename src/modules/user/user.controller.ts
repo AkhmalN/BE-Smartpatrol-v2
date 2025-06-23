@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import { IUserService } from "./user.service";
+import { verifyToken } from "@/utils/verify";
+import { IJWTVerify } from "@/models/user.model";
+import { logger } from "@/utils/logger";
 
 export class UserController {
   private userService: IUserService;
@@ -136,15 +139,11 @@ export class UserController {
     }
   }
   async getUserByUnitKerja(req: Request, res: Response) {
-    const { unit_kerja } = req.query;
-    if (!unit_kerja) {
-      res.status(404).json({
-        message: "Unit kerja tidak ditemukan",
-      });
-    }
-
+    const { nama_instansi } = req.query;
     try {
-      const user = this.userService.getUsersByUnitKerja(unit_kerja as string);
+      const user = await this.userService.getUsersByUnitKerja(
+        nama_instansi as string
+      );
       res.status(200).json({
         message: "Users retrieved successfully",
         data: user,

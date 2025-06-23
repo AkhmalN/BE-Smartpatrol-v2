@@ -104,7 +104,9 @@ export class UserRepository implements IUserRepository {
 
   // Implementation for getting users by unit kerja
   async getUsersByUnitKerja(unitKerja: string): Promise<IUser[]> {
-    const userByUnitKerja = this.userModel.find({ unit_kerja: unitKerja });
+    const userByUnitKerja = await this.userModel
+      .find({ unit_kerja: unitKerja })
+      .exec();
     return userByUnitKerja;
   }
 }

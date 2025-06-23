@@ -26,7 +26,7 @@ export interface IUserService {
     sortBy?: "ASC" | "DESC";
     search?: string;
   }): Promise<IUser[]>;
-  getUsersByUnitKerja(unitKerja: string): Promise<IUser[]>;
+  getUsersByUnitKerja(nama_instansi: string): Promise<IUser[]>;
   changeUserPassword(userId: string, newPassword: string): Promise<void>;
   loginUser(credentials: IUserLoginDTO): Promise<{
     access_token: string;
@@ -98,8 +98,8 @@ export class UserService implements IUserService {
     return this.userRepository.getAllUsers({ page, limit, sortBy, search });
   }
 
-  async getUsersByUnitKerja(unitKerja: string): Promise<IUser[]> {
-    return this.userRepository.getUsersByUnitKerja(unitKerja);
+  async getUsersByUnitKerja(nama_instansi: string): Promise<IUser[]> {
+    return await this.userRepository.getUsersByUnitKerja(nama_instansi);
   }
 
   async changeUserPassword(userId: string, newPassword: string): Promise<void> {
@@ -137,7 +137,7 @@ export class UserService implements IUserService {
       {
         id: findUser._id,
         role: findUser.role,
-        username: findUser.username,
+        instansi: findUser.unit_kerja,
       },
       JWT_SECRET,
       {

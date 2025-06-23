@@ -88,3 +88,9 @@ export interface IUserChangePasswordDTO {
   userId: string;
   newPassword: string;
 }
+
+export interface IJWTVerify {
+  id: string;
+  role: string;
+  instansi: string;
+}
